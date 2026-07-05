@@ -101,6 +101,9 @@
   .stage{perspective:1600px;margin-bottom:18px}
   .card{position:relative;width:100%;min-height:340px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,.1,.2,1);cursor:pointer}
   .card.flipped{transform:rotateY(180deg)}
+  /* single-face cards (Prüfung, Grammatik) grow with content instead of clipping */
+  .card.flat{min-height:0}
+  .card.flat .face{position:relative;inset:auto;overflow:visible}
   .face{position:absolute;inset:0;backface-visibility:hidden;background:var(--paper);color:var(--ink);border-radius:22px;padding:28px 26px;display:flex;flex-direction:column;overflow-y:auto;box-shadow:0 26px 60px -26px rgba(0,0,0,.75), inset 0 0 0 1px var(--paper-edge)}
   .face.back{transform:rotateY(180deg);background:linear-gradient(180deg,#fbf8f1 0%,#f2ece0 100%)}
   .tagrow{display:flex;gap:8px;align-items:center;margin-bottom:auto;flex-wrap:wrap}
@@ -137,6 +140,15 @@
   .cloze-hint{font-size:13px;color:#0e5147;background:rgba(67,194,173,.14);border:1px solid rgba(67,194,173,.3);border-radius:10px;padding:8px 12px;margin-bottom:8px;align-self:flex-start}
   .cloze-hint b{font-weight:700;color:var(--teal-deep)}
   .example .blank-fill{color:var(--teal-deep);font-weight:700}
+  /* grammar note + verb-form tables */
+  .note.gram{background:#eef4f1;border:1px solid #dbe7e2;color:var(--ink)}
+  .note.gram strong{color:var(--teal-deep)}
+  .vforms{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+  .vforms span{display:flex;flex-direction:column;gap:2px;background:#fff;border:1px solid var(--paper-edge);border-radius:9px;padding:7px 10px;font-size:14px;font-weight:600;color:var(--ink)}
+  .vforms span em{font-style:normal;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .vforms span.hl{background:var(--teal-soft);border-color:var(--teal)}
+  .vforms span.hl em{color:var(--teal-deep)}
+  @media (max-width:420px){.vforms{grid-template-columns:1fr}}
   .example{font-size:15px;line-height:1.5;color:var(--ink);border-left:3px solid var(--teal);padding-left:14px;margin-bottom:14px}
   .example b{color:var(--teal-deep);font-weight:700}
   .note{font-size:13px;line-height:1.5;color:var(--ink-soft);background:#efe8da;border-radius:12px;padding:12px 14px;margin-top:auto}
@@ -226,6 +238,7 @@
 
   <div class="tools">
     <button class="tool primary" id="quizBtn">🎯 Prüfung starten</button>
+    <button class="tool" id="gramBtn">🧩 Grammatik & Zeiten</button>
     <button class="tool" id="addBtn">＋ Eigene Karte</button>
   </div>
 
@@ -235,11 +248,6 @@
     <div class="panel">
       <div class="p-head"><span>Diese Woche</span><span id="weekTotal"></span></div>
       <div class="week" id="week"></div>
-    </div>
-
-    <div class="panel">
-      <div class="p-head"><span>Abzeichen</span><span id="badgeCount"></span></div>
-      <div class="badges" id="badges"></div>
     </div>
   </div>
 
@@ -1887,18 +1895,6 @@ function buildQueue(){
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
-/* ============================================================ BADGES */
-const BADGES = [
-  {i:"🌱",name:"Erste 10",cond:s=>masteredTotalAll()>=10},
-  {i:"📚",name:"50 Wörter",cond:s=>masteredTotalAll()>=50},
-  {i:"🏆",name:"100 Wörter",cond:s=>masteredTotalAll()>=100},
-  {i:"🎯",name:"Treffsicher",cond:s=>s.reviewed>=50 && s.correct/Math.max(1,s.reviewed)>=0.9},
-  {i:"🔥",name:"3-Tage-Serie",cond:s=>(s.daysStreak||0)>=3},
-  {i:"⚡",name:"7-Tage-Serie",cond:s=>(s.daysStreak||0)>=7},
-  {i:"✅",name:"Tagesziel",cond:s=>s.dayCount>=(s.goal||20)},
-  {i:"💯",name:"100 Antworten",cond:s=>s.reviewed>=100},
-];
-
 /* ============================================================ RENDER: dashboard */
 function renderKPIs(){
   const total=activeIndices().length, mastered=masteredCount();
@@ -1924,14 +1920,6 @@ function renderWeek(){
     return `<div class="day"><div class="col${today}" style="height:${h}px" title="${x.c} Karten"></div><div class="dl">${dl}</div></div>`;
   }).join("");
   document.getElementById("weekTotal").textContent = sum+" Karten";
-}
-function renderBadges(){
-  const earned=BADGES.filter(b=>{try{return b.cond(stats)}catch(e){return false}});
-  document.getElementById("badgeCount").textContent = earned.length+" / "+BADGES.length;
-  document.getElementById("badges").innerHTML = BADGES.map(b=>{
-    const on = earned.includes(b);
-    return `<div class="badge${on?"":" locked"}"><span class="b-i">${b.i}</span>${b.name}</div>`;
-  }).join("");
 }
 function renderUsers(){
   const el=document.getElementById("users"); el.innerHTML="";
@@ -1994,6 +1982,87 @@ function renderProgress(){
 }
 
 /* ============================================================ RENDER: main (study) */
+/* ============================================================ GRAMMATIK: Verbformen & Erklärungen */
+const IRREGULAR = {
+  // base: [Simple Past, Past Participle]
+  be:["was/were","been"], become:["became","become"], begin:["began","begun"], break:["broke","broken"],
+  bring:["brought","brought"], build:["built","built"], buy:["bought","bought"], catch:["caught","caught"],
+  choose:["chose","chosen"], come:["came","come"], cost:["cost","cost"], cut:["cut","cut"], do:["did","done"],
+  draw:["drew","drawn"], drink:["drank","drunk"], drive:["drove","driven"], eat:["ate","eaten"], fall:["fell","fallen"],
+  feel:["felt","felt"], find:["found","found"], fly:["flew","flown"], forget:["forgot","forgotten"], get:["got","got/gotten"],
+  give:["gave","given"], go:["went","gone"], grow:["grew","grown"], have:["had","had"], hear:["heard","heard"],
+  hold:["held","held"], keep:["kept","kept"], know:["knew","known"], leave:["left","left"], lose:["lost","lost"],
+  make:["made","made"], mean:["meant","meant"], meet:["met","met"], pay:["paid","paid"], put:["put","put"],
+  read:["read","read"], ride:["rode","ridden"], ring:["rang","rung"], run:["ran","run"], say:["said","said"],
+  see:["saw","seen"], sell:["sold","sold"], send:["sent","sent"], show:["showed","shown"], sing:["sang","sung"],
+  sit:["sat","sat"], sleep:["slept","slept"], speak:["spoke","spoken"], spend:["spent","spent"], stand:["stood","stood"],
+  steal:["stole","stolen"], swim:["swam","swum"], take:["took","taken"], teach:["taught","taught"], tell:["told","told"],
+  think:["thought","thought"], throw:["threw","thrown"], understand:["understood","understood"], wake:["woke","woken"],
+  wear:["wore","worn"], win:["won","won"], write:["wrote","written"], hit:["hit","hit"], let:["let","let"],
+  set:["set","set"], hurt:["hurt","hurt"], lead:["led","led"], bite:["bit","bitten"], hide:["hid","hidden"],
+  shoot:["shot","shot"], sink:["sank","sunk"],
+};
+const DOUBLE_FINAL = new Set(["stop","plan","run","sit","get","swim","begin","put","win","shop","drop","cut","hit","let","set","chat","jog","clap","rob","tap","ban","grab","permit","refer","prefer","occur"]);
+const THIRD_IRREGULAR = {have:"has", be:"is", do:"does", go:"goes"};
+function thirdPerson(v){
+  if(THIRD_IRREGULAR[v]) return THIRD_IRREGULAR[v];
+  if(/(s|ss|sh|ch|x|z|o)$/.test(v)) return v+"es";
+  if(/[^aeiou]y$/.test(v)) return v.slice(0,-1)+"ies";
+  return v+"s";
+}
+function ingForm(v){
+  if(v==="be") return "being";
+  if(v.endsWith("ie")) return v.slice(0,-2)+"ying";
+  if(/(ee|oe|ye)$/.test(v)) return v+"ing";
+  if(v.endsWith("e")) return v.slice(0,-1)+"ing";
+  if(DOUBLE_FINAL.has(v)) return v+v.slice(-1)+"ing";
+  return v+"ing";
+}
+function regularPast(v){
+  if(v.endsWith("e")) return v+"d";
+  if(/[^aeiou]y$/.test(v)) return v.slice(0,-1)+"ied";
+  if(DOUBLE_FINAL.has(v)) return v+v.slice(-1)+"ed";
+  return v+"ed";
+}
+function verbForms(v){
+  const ir=IRREGULAR[v];
+  return {base:v, past: ir?ir[0]:regularPast(v), pp: ir?ir[1]:regularPast(v), ing:ingForm(v), third:thirdPerson(v), reg:!ir};
+}
+// Grammatik-/Verwendungserklärung, ersetzt den früheren Platzhaltertext
+function baseVerb(en){ return (en||"").split("/")[0].replace(/^to\s+/i,"").trim().toLowerCase().replace(/[^a-z]/g,""); }
+function grammarNote(c){
+  const enFirst=(c.en||"").split("/")[0].trim();
+  const de=(c.de||"");
+  // Verb
+  if(/^to\s+/i.test(c.en)){
+    const v=baseVerb(c.en); const f=verbForms(v);
+    const kind=f.reg?"regelmäßig (‑ed)":"unregelmäßig";
+    return `<div class="note gram" style="margin-top:14px"><strong>🔧 Verb</strong> · ${kind}
+      <div class="vforms">
+        <span><em>Infinitiv</em>to ${v}</span><span><em>3. Person</em>${f.third}</span>
+        <span><em>Simple Past</em>${f.past}</span><span><em>Past Participle</em>${f.pp}</span>
+        <span><em>‑ing-Form</em>${f.ing}</span></div></div>`;
+  }
+  // Substantiv (mit Artikel im Deutschen)
+  const art=de.match(/^\s*(der|die|das)\b/i);
+  if(art){
+    const g={der:"maskulin",die:"feminin",das:"neutrum"}[art[1].toLowerCase()];
+    const uncount=/unz(ä|ae)hlbar/i.test(c.note||"")||/unz(ä|ae)hlbar/i.test(de);
+    return `<div class="note gram" style="margin-top:14px"><strong>📦 Substantiv</strong> · dt. <b>${art[1].toLowerCase()}</b> (${g}).
+      Im Englischen kein Genus – Artikel ist immer <b>the</b>/<b>a</b>. ${uncount?"Unzählbar – kein Plural, kein „a“.":"Plural meist mit <b>‑s</b>."}</div>`;
+  }
+  // Adverb
+  if(/ly$/i.test(enFirst) && !/\s/.test(enFirst)){
+    return `<div class="note gram" style="margin-top:14px"><strong>⚡ Adverb</strong> · beschreibt ein Verb/Adjektiv (oft auf <b>‑ly</b>): „She works <b>${enFirst}</b>.“ Steht meist nach dem Verb oder am Satzanfang.</div>`;
+  }
+  // Redewendung / Mehrwortausdruck
+  if(/\s/.test(enFirst)){
+    return `<div class="note gram" style="margin-top:14px"><strong>💬 Feste Wendung</strong> · als Ganzes lernen, nicht Wort für Wort übersetzen: „<b>${enFirst}</b>“.</div>`;
+  }
+  // sonst: Adjektiv
+  return `<div class="note gram" style="margin-top:14px"><strong>🏷 Adjektiv</strong> · steht vor dem Substantiv („a <b>${enFirst}</b> …“) oder nach <em>to be</em> („it is <b>${enFirst}</b>“). Steigerung: <b>‑er/‑est</b> oder <b>more/most</b>.</div>`;
+}
+
 function promptSide(c){ return direction==="en2de" ? c.en : c.de; }
 function answerSide(c){ return direction==="en2de" ? c.de : c.en; }
 
@@ -2020,8 +2089,9 @@ function clozePromptHTML(c){
 
 function render(){
   loadVoices();
-  renderKPIs(); renderWeek(); renderBadges(); renderUsers(); renderLevels(); renderCats(); renderDir(); renderModes(); renderProgress();
+  renderKPIs(); renderWeek(); renderUsers(); renderLevels(); renderCats(); renderDir(); renderModes(); renderProgress();
   const main=document.getElementById("main");
+  if(gram){ renderGram(); return; }
   if(quiz){ renderQuiz(); return; }
 
   const total=activeIndices().length;
@@ -2074,7 +2144,9 @@ function render(){
         <div class="answer">${answerText} ${engAns?`<button class="say-btn" data-say="${c.en.replace(/"/g,'&quot;')}">🔊</button>`:""}</div>
         ${engAns?pronLine(c.en):""}
         <div class="example">${exampleHTML}</div>
-        ${isCloze?`<div class="note" style="opacity:.7">${c.de}</div>`:(c.note?`<div class="note">${c.note}</div>`:`<div class="note" style="opacity:.55">Beispiel oben zeigt die typische Verwendung.</div>`)}
+        ${isCloze
+          ? `${grammarNote(c)}<div class="note" style="opacity:.6;margin-top:8px">🇩🇪 ${c.de}</div>`
+          : (c.note?`<div class="note">${c.note}</div>`:grammarNote(c))}
       </div>
     </div></div>
     <div class="actions" id="actions"></div>
@@ -2123,6 +2195,7 @@ async function resetAll(){ activeIndices().forEach(i=>{ boxes[keyOf(i)]={b:1,wro
 function startQuiz(){
   const pool=activeIndices(); if(!pool.length) return;
   const size=Math.min(12,pool.length);
+  gram=null;
   quiz={ items:shuffle(pool).slice(0,size), i:0, wrong:[], checked:false, correct:0, typed:"", dir:direction };
   render();
 }
@@ -2158,7 +2231,7 @@ function renderQuiz(){
   const dirBadge = isCloze ? `<span class="dir-badge">✍︎ Lücke</span>` : `<span class="dir-badge">${engProm?"EN → DE":"DE → EN"}</span>`;
   const placeholder = isCloze ? "Fehlendes Wort…" : (engProm?"Deutsche":"Englische")+" Antwort…";
   main.innerHTML=`
-    <div class="stage"><div class="card" id="card"><div class="face front">
+    <div class="stage"><div class="card flat" id="card"><div class="face front">
       <div class="tagrow"><span class="lvl-badge">${c.lvl}</span><span class="tag">🎯 Prüfung</span>${dirBadge}</div>
       ${banner}
       ${promptBlock}
@@ -2187,6 +2260,104 @@ async function quizCheck(){
   render();
 }
 function quizNext(){ quiz.i++; quiz.checked=false; quiz.typed=""; render(); }
+
+/* ============================================================ GRAMMATIK-TRAINER (Zeitformen) */
+const GRAMMAR_VERBS = [
+  {v:"go",de:"gehen"},{v:"make",de:"machen"},{v:"take",de:"nehmen"},{v:"see",de:"sehen"},
+  {v:"come",de:"kommen"},{v:"give",de:"geben"},{v:"find",de:"finden"},{v:"think",de:"denken"},
+  {v:"buy",de:"kaufen"},{v:"bring",de:"bringen"},{v:"speak",de:"sprechen"},{v:"write",de:"schreiben"},
+  {v:"read",de:"lesen"},{v:"drive",de:"fahren"},{v:"eat",de:"essen"},{v:"drink",de:"trinken"},
+  {v:"run",de:"rennen"},{v:"swim",de:"schwimmen"},{v:"sing",de:"singen"},{v:"sleep",de:"schlafen"},
+  {v:"leave",de:"verlassen"},{v:"meet",de:"treffen"},{v:"pay",de:"bezahlen"},{v:"send",de:"senden"},
+  {v:"lose",de:"verlieren"},{v:"win",de:"gewinnen"},{v:"teach",de:"unterrichten"},{v:"understand",de:"verstehen"},
+  {v:"begin",de:"beginnen"},{v:"forget",de:"vergessen"},{v:"choose",de:"wählen"},{v:"catch",de:"fangen"},
+  {v:"work",de:"arbeiten"},{v:"play",de:"spielen"},{v:"study",de:"lernen / studieren"},{v:"try",de:"versuchen"},
+  {v:"stop",de:"anhalten / aufhören"},{v:"plan",de:"planen"},{v:"use",de:"benutzen"},{v:"like",de:"mögen"},
+  {v:"live",de:"leben / wohnen"},{v:"watch",de:"anschauen"},{v:"carry",de:"tragen"},{v:"decide",de:"entscheiden"},
+];
+const GRAM_FORMS = [
+  {key:"past",  q:"Simple Past",                  tip:"Abgeschlossene Vergangenheit: <b>Yesterday I ___ .</b>"},
+  {key:"pp",    q:"Past Participle (3. Form)",     tip:"Nach have/has/had & im Passiv: <b>I have ___ .</b>"},
+  {key:"ing",   q:"‑ing-Form (Verlaufsform)",     tip:"Gerade jetzt: <b>I am ___ .</b>"},
+  {key:"third", q:"3. Person Singular (he/she/it)",tip:"Präsens mit he/she/it: <b>She ___ every day.</b>"},
+];
+let gram=null; // {items:[{gv,form,answer,forms}], i, checked, correct, wrong:[], typed, lastOK}
+function gramNorm(s){ return (s||"").toLowerCase().replace(/[.,!?;:"'’]/g,"").replace(/\s+/g," ").trim(); }
+function gramMatch(answer, input){ const cand=gramNorm(input); return answer.split("/").map(gramNorm).includes(cand); }
+function startGram(){
+  quiz=null;
+  const pool=shuffle(GRAMMAR_VERBS.map((_,i)=>i));
+  const N=Math.min(12,pool.length); const items=[];
+  for(let n=0;n<N;n++){
+    const gv=GRAMMAR_VERBS[pool[n]]; const f=verbForms(gv.v);
+    const form=GRAM_FORMS[Math.floor(Math.random()*GRAM_FORMS.length)];
+    items.push({gv, form, answer:f[form.key], forms:f});
+  }
+  gram={items, i:0, checked:false, correct:0, wrong:[], typed:"", lastOK:false};
+  render();
+}
+function verbTable(f, highlight){
+  const row=(lbl,val,key)=>`<span class="${highlight===key?"hl":""}"><em>${lbl}</em>${val}</span>`;
+  return `<div class="vforms">
+    ${row("Infinitiv","to "+f.base)}
+    ${row("3. Person",f.third,"third")}
+    ${row("Simple Past",f.past,"past")}
+    ${row("Past Participle",f.pp,"pp")}
+    ${row("‑ing-Form",f.ing,"ing")}</div>`;
+}
+function renderGram(){
+  const main=document.getElementById("main");
+  if(gram.i>=gram.items.length){
+    const n=gram.items.length, sc=Math.round(gram.correct/n*100);
+    const missHTML = gram.wrong.length ? `<div class="miss-list">${gram.wrong.map(w=>`<div class="m"><span>to ${w.base} · ${w.q}</span><span class="en">${w.answer}</span></div>`).join("")}</div>` : `<p>Perfekt — alle Formen richtig! 🎉</p>`;
+    main.innerHTML=`<div class="done">
+      <div class="k-lbl" style="color:var(--ink-soft);letter-spacing:.1em">Grammatik-Ergebnis</div>
+      <div class="score-ring" style="color:${sc>=80?'var(--teal-deep)':sc>=50?'var(--amber)':'var(--rust)'}">${sc}%</div>
+      <p>${gram.correct} von ${n} richtig.</p>
+      ${missHTML}
+      <div class="btnrow">
+        ${gram.wrong.length?`<button class="btn again" id="gRetry">Fehler üben (${gram.wrong.length})</button>`:""}
+        <button class="btn reveal" id="gNew">Neue Runde</button>
+        <button class="btn ghost" id="gEnd">Beenden</button>
+      </div></div>`;
+    document.getElementById("gNew").onclick=()=>startGram();
+    document.getElementById("gEnd").onclick=()=>{ gram=null; buildQueue(); render(); };
+    const rt=document.getElementById("gRetry");
+    if(rt) rt.onclick=()=>{ const items=gram.wrong.map(w=>({gv:{v:w.base,de:w.de}, form:{key:w.key,q:w.q,tip:w.tip}, answer:w.answer, forms:w.forms})); gram={items, i:0, checked:false, correct:0, wrong:[], typed:"", lastOK:false}; render(); };
+    return;
+  }
+  const it=gram.items[gram.i]; const f=it.forms;
+  const banner = gram.checked ? (gram.lastOK?`<div class="banner ok">✓ Richtig!</div>`:`<div class="banner no">✗ Richtig: <b style="margin-left:4px">${it.answer}</b>${gram.typed?` <span class="typed">· du: „${gram.typed}“</span>`:""}</div>`) : "";
+  main.innerHTML=`
+    <div class="stage"><div class="card flat" id="card"><div class="face front">
+      <div class="tagrow"><span class="tag">🧩 Grammatik</span><span class="dir-badge">Zeitformen</span></div>
+      ${banner}
+      <div class="prompt">to ${it.gv.v} <span style="color:var(--ink-soft);font-size:.62em">→ ${it.form.q}</span></div>
+      <div class="cloze-hint">Bedeutung: <b>${it.gv.de}</b> · ${it.form.tip}</div>
+      <div class="type-wrap">
+        <input id="gramInput" class="answer-input" placeholder="Form eintippen…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ${gram.checked?"disabled":""}>
+        <div class="type-hint">${gram.checked?"<kbd style='font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Leertaste</kbd> weiter":"<kbd style='font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Enter</kbd> prüfen"}</div>
+      </div>
+      ${gram.checked?`<div class="note gram" style="margin-top:14px"><strong>${f.reg?"Regelmäßig (‑ed)":"Unregelmäßig"}</strong> · alle Formen von <b>to ${f.base}</b>:${verbTable(f, it.form.key)}</div>`:""}
+    </div></div></div>
+    <div class="actions">${gram.checked?`<button class="btn reveal" id="gNext">Weiter</button>`:`<button class="btn reveal" id="gCheck">Prüfen</button>`}</div>
+    <div class="footline"><span class="count">Frage ${gram.i+1} / ${gram.items.length}</span><span class="kb">richtig: ${gram.correct}</span><button class="reset" id="gAbort">abbrechen</button></div>`;
+  const inp=document.getElementById("gramInput");
+  if(inp && !gram.checked){ inp.focus(); inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();gramCheck();} }); }
+  const cb=document.getElementById("gCheck"); if(cb) cb.onclick=gramCheck;
+  const nb=document.getElementById("gNext"); if(nb) nb.onclick=gramNext;
+  document.getElementById("gAbort").onclick=()=>{ gram=null; buildQueue(); render(); };
+}
+async function gramCheck(){
+  const it=gram.items[gram.i]; const inp=document.getElementById("gramInput");
+  gram.typed=inp?inp.value.trim():""; gram.lastOK=gramMatch(it.answer, gram.typed); gram.checked=true;
+  if(gram.lastOK){ gram.correct++; stats.correct++; stats.streak++; if(stats.streak>stats.best)stats.best=stats.streak; }
+  else{ stats.streak=0; gram.wrong.push({base:it.gv.v, de:it.gv.de, q:it.form.q, key:it.form.key, tip:it.form.tip, answer:it.answer, forms:it.forms}); }
+  stats.reviewed++; registerActivity();
+  await saveStats();
+  render();
+}
+function gramNext(){ gram.i++; gram.checked=false; gram.typed=""; render(); }
 
 /* ============================================================ ADD OWN CARD */
 function openAddCard(){
@@ -2227,6 +2398,12 @@ document.addEventListener("keydown", e=>{
   const tag=e.target&&e.target.tagName;
   if(tag==="INPUT"||tag==="TEXTAREA") return;
   if(document.getElementById("modalBg")){ if(e.key==="Escape") closeModal(); return; }
+  // grammar-trainer keys
+  if(gram){
+    if(e.code==="Space"){ e.preventDefault(); if(gram.i<gram.items.length && gram.checked) gramNext(); }
+    else if(e.key==="Enter" && gram.checked) gramNext();
+    return;
+  }
   // quiz keys
   if(quiz){
     if(e.code==="Space"){ e.preventDefault(); if(quiz.i>=quiz.items.length){ return; } if(quiz.checked) quizNext(); }
@@ -2247,6 +2424,7 @@ document.addEventListener("keydown", e=>{
 function advance(){ if(mode==="type"&&checked) rate(lastCorrect); else rate(true); }
 
 document.getElementById("quizBtn").onclick=startQuiz;
+document.getElementById("gramBtn").onclick=startGram;
 document.getElementById("addBtn").onclick=openAddCard;
 
 (async function init(){ await loadProfiles(); await loadProfileData(); buildQueue(); render(); })();

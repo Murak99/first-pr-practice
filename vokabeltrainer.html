@@ -13,11 +13,12 @@
     --bg:#181a1f; --bg-2:#1f2228;
     --surface:#24272f; --surface-2:#2c303a;
     --stroke:rgba(255,255,255,.09); --stroke-2:rgba(255,255,255,.15);
-    --paper:#e7e1d3; --paper-edge:#d3ccb9;
-    --ink:#20242e; --ink-soft:#5d6472;
+    /* Karte im Dark-Design „Slate-Graphit" */
+    --paper:#242833; --paper-edge:rgba(255,255,255,.10);
+    --ink:#e9ebf1; --ink-soft:#a6acba;
     --text:#eef0f4; --muted:#9aa0ab;
     --amber:#f0a83c; --amber-soft:#f7cd86;
-    --teal:#43c2ad; --teal-deep:#2b8f80; --teal-soft:#cfeee7;
+    --teal:#43c2ad; --teal-deep:#2b8f80; --teal-soft:#cfeee7; --teal-lite:#5fd0bb;
     --violet:#8f8cf0; --rust:#e08363;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -116,55 +117,55 @@
   .card.flat{min-height:0}
   .card.flat .face{position:relative;inset:auto;overflow:visible}
   .face{position:absolute;inset:0;backface-visibility:hidden;background:var(--paper);color:var(--ink);border-radius:22px;padding:28px 26px;display:flex;flex-direction:column;overflow-y:auto;box-shadow:0 26px 60px -26px rgba(0,0,0,.75), inset 0 0 0 1px var(--paper-edge)}
-  .face.back{transform:rotateY(180deg);background:linear-gradient(180deg,#ece6d8 0%,#e1daca 100%)}
+  .face.back{transform:rotateY(180deg);background:linear-gradient(180deg,#262a35 0%,#1c1f28 100%)}
   .tagrow{display:flex;gap:8px;align-items:center;margin-bottom:auto;flex-wrap:wrap}
-  .tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--amber);background:rgba(240,168,60,.13);padding:5px 10px;border-radius:7px}
-  .lvl-badge{font-size:10.5px;letter-spacing:.08em;font-weight:700;color:#0e5147;background:rgba(67,194,173,.18);padding:5px 9px;border-radius:7px}
-  .dir-badge{font-size:10.5px;letter-spacing:.08em;font-weight:700;color:#3a327a;background:rgba(143,140,240,.18);padding:5px 9px;border-radius:7px}
+  .tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--amber);background:rgba(240,168,60,.16);padding:5px 10px;border-radius:7px}
+  .lvl-badge{font-size:10.5px;letter-spacing:.08em;font-weight:700;color:#7fe0cd;background:rgba(67,194,173,.18);padding:5px 9px;border-radius:7px}
+  .dir-badge{font-size:10.5px;letter-spacing:.08em;font-weight:700;color:#c6c4f6;background:rgba(143,140,240,.20);padding:5px 9px;border-radius:7px}
   .prompt{font-family:"Fraunces",serif;font-weight:500;font-size:34px;line-height:1.12;color:var(--ink);margin:18px 0 8px}
   .say{display:inline-flex;align-items:center;gap:8px;margin-top:4px}
-  .say-btn{font-family:inherit;font-size:13px;font-weight:600;color:#0e5147;background:rgba(67,194,173,.16);border:1px solid rgba(67,194,173,.4);border-radius:99px;padding:6px 13px;cursor:pointer;transition:.15s}
+  .say-btn{font-family:inherit;font-size:13px;font-weight:600;color:#8fe4d3;background:rgba(67,194,173,.16);border:1px solid rgba(67,194,173,.4);border-radius:99px;padding:6px 13px;cursor:pointer;transition:.15s}
   .say-btn:hover{background:rgba(67,194,173,.28)}
   .respell{font-size:14px;color:var(--ink-soft)}
-  .respell b{color:var(--teal-deep);font-weight:600}
+  .respell b{color:var(--teal-lite);font-weight:600}
   .hint{font-size:12.5px;color:var(--ink-soft);margin-top:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .hint kbd{font-family:inherit;font-size:11px;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;color:var(--ink);font-weight:600}
+  .hint kbd{font-family:inherit;font-size:11px;background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;color:var(--ink);font-weight:600}
 
   .type-wrap{margin-top:8px}
-  .answer-input{width:100%;font-family:"Fraunces",serif;font-size:24px;font-weight:500;color:var(--ink);background:#f0ebde;border:none;border-bottom:2px solid var(--amber);padding:10px 4px;outline:none}
+  .answer-input{width:100%;font-family:"Fraunces",serif;font-size:24px;font-weight:500;color:var(--ink);background:#1b1e26;border:none;border-bottom:2px solid var(--amber);border-radius:8px 8px 0 0;padding:10px 10px;outline:none}
   .answer-input::placeholder{font-family:"Instrument Sans",sans-serif;font-size:16px;font-weight:400;color:var(--ink-soft)}
   .answer-input:focus{border-bottom-color:var(--teal-deep)}
   .type-hint{font-size:12px;color:var(--ink-soft);margin-top:10px}
   .banner{align-self:stretch;font-size:14px;font-weight:600;border-radius:11px;padding:11px 13px;margin-bottom:12px;line-height:1.4;display:flex;align-items:center;gap:8px}
-  .banner.ok{background:var(--teal-soft);color:#155a4f}
-  .banner.no{background:#f6ddd1;color:#9d4326}
+  .banner.ok{background:rgba(67,194,173,.16);color:#86e5d1}
+  .banner.no{background:rgba(224,131,99,.16);color:#f0a98c}
   .banner .typed{font-weight:400;opacity:.85}
 
   .answer{font-family:"Fraunces",serif;font-weight:600;font-size:33px;line-height:1.1;color:var(--ink);margin:12px 0 6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .answer .say-btn{font-size:14px;padding:7px 14px}
   .respell-back{font-size:14px;color:var(--ink-soft);margin-bottom:12px}
-  .respell-back b{color:var(--teal-deep);font-weight:600}
+  .respell-back b{color:var(--teal-lite);font-weight:600}
   /* cloze (Lückentext) cards */
   .cloze-de{font-family:"Fraunces",serif;font-weight:500;font-size:23px;line-height:1.24;color:var(--ink);margin:16px 0 12px}
   .cloze-en{font-size:17px;line-height:1.65;color:var(--ink-soft);margin-bottom:13px}
   .cloze-en .blank{display:inline-block;min-width:76px;border-bottom:2px solid var(--amber);margin:0 4px;vertical-align:baseline}
-  .cloze-hint{font-size:13px;color:#0e5147;background:rgba(67,194,173,.14);border:1px solid rgba(67,194,173,.3);border-radius:10px;padding:8px 12px;margin-bottom:8px;align-self:flex-start}
-  .cloze-hint b{font-weight:700;color:var(--teal-deep)}
-  .example .blank-fill{color:var(--teal-deep);font-weight:700}
+  .cloze-hint{font-size:13px;color:#8fe4d3;background:rgba(67,194,173,.14);border:1px solid rgba(67,194,173,.3);border-radius:10px;padding:8px 12px;margin-bottom:8px;align-self:flex-start}
+  .cloze-hint b{font-weight:700;color:var(--teal-lite)}
+  .example .blank-fill{color:var(--teal-lite);font-weight:700}
   /* grammar note + verb-form tables */
-  .note.gram{background:#eef4f1;border:1px solid #dbe7e2;color:var(--ink)}
-  .note.gram strong{color:var(--teal-deep)}
-  .note.syn{background:#eef1fb;border:1px solid #dce0f4;color:var(--ink);line-height:1.5}
-  .note.syn strong{color:#4b47b8}
+  .note.gram{background:rgba(67,194,173,.10);border:1px solid rgba(67,194,173,.22);color:var(--ink)}
+  .note.gram strong{color:var(--teal-lite)}
+  .note.syn{background:rgba(143,140,240,.13);border:1px solid rgba(143,140,240,.28);color:var(--ink);line-height:1.5}
+  .note.syn strong{color:#b9b6f5}
   .vforms{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
-  .vforms span{display:flex;flex-direction:column;gap:2px;background:#fff;border:1px solid var(--paper-edge);border-radius:9px;padding:7px 10px;font-size:14px;font-weight:600;color:var(--ink)}
+  .vforms span{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.05);border:1px solid var(--paper-edge);border-radius:9px;padding:7px 10px;font-size:14px;font-weight:600;color:var(--ink)}
   .vforms span em{font-style:normal;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
-  .vforms span.hl{background:var(--teal-soft);border-color:var(--teal)}
-  .vforms span.hl em{color:var(--teal-deep)}
+  .vforms span.hl{background:rgba(67,194,173,.20);border-color:var(--teal)}
+  .vforms span.hl em{color:var(--teal-lite)}
   @media (max-width:420px){.vforms{grid-template-columns:1fr}}
   .example{font-size:15px;line-height:1.5;color:var(--ink);border-left:3px solid var(--teal);padding-left:14px;margin-bottom:14px}
-  .example b{color:var(--teal-deep);font-weight:700}
-  .note{font-size:13px;line-height:1.5;color:var(--ink-soft);background:#efe8da;border-radius:12px;padding:12px 14px;margin-top:auto}
+  .example b{color:var(--teal-lite);font-weight:700}
+  .note{font-size:13px;line-height:1.5;color:var(--ink-soft);background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;margin-top:auto}
   .note strong{color:var(--rust)}
 
   .actions{display:flex;gap:11px}
@@ -184,14 +185,14 @@
   .reset{background:none;border:none;color:var(--muted);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
   .reset:hover{color:var(--amber-soft)}
 
-  .done{background:linear-gradient(180deg,var(--paper) 0%,#ddd5c3 100%);color:var(--ink);border-radius:22px;padding:40px 28px;text-align:center;box-shadow:0 26px 60px -26px rgba(0,0,0,.7)}
+  .done{background:linear-gradient(180deg,#262a35 0%,#1c1f28 100%);color:var(--ink);border-radius:22px;padding:40px 28px;text-align:center;box-shadow:0 26px 60px -26px rgba(0,0,0,.7), inset 0 0 0 1px var(--paper-edge)}
   .done h2{font-family:"Fraunces",serif;font-weight:500;font-size:27px;margin-bottom:10px}
   .done p{color:var(--ink-soft);font-size:15px;line-height:1.55;margin-bottom:20px}
   .score-ring{font-family:"Fraunces",serif;font-size:44px;font-weight:600;margin:6px 0 4px}
-  .miss-list{text-align:left;background:#fff;border:1px solid var(--paper-edge);border-radius:14px;padding:14px 16px;margin:8px 0 20px;max-height:230px;overflow:auto}
-  .miss-list .m{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #eee5d5;font-size:14px}
+  .miss-list{text-align:left;background:rgba(255,255,255,.04);border:1px solid var(--paper-edge);border-radius:14px;padding:14px 16px;margin:8px 0 20px;max-height:230px;overflow:auto}
+  .miss-list .m{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
   .miss-list .m:last-child{border-bottom:none}
-  .miss-list .m .en{font-weight:700;color:var(--teal-deep)}
+  .miss-list .m .en{font-weight:700;color:var(--teal-lite)}
   .done .btnrow{display:flex;gap:11px;flex-wrap:wrap}
   .done .btnrow .btn{min-width:130px}
 
@@ -2396,7 +2397,7 @@ function render(){
     ? `<div class="face front">${tagrow}${promptBlock}
         <div class="type-wrap">
           <input id="answerInput" class="answer-input" placeholder="${inPlace}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
-          <div class="type-hint"><kbd style="font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600">Enter</kbd> zum Prüfen · leer = „Weiß ich nicht“</div>
+          <div class="type-hint"><kbd style="font-family:inherit;background:rgba(255,255,255,.09);color:var(--ink);box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600">Enter</kbd> zum Prüfen · leer = „Weiß ich nicht“</div>
         </div></div>`
     : `<div class="face front">${tagrow}${promptBlock}
         <div class="hint"><kbd>Leertaste</kbd> Antwort zeigen · <kbd>P</kbd> anhören</div></div>`;
@@ -2508,7 +2509,7 @@ function renderQuiz(){
       ${say}
       <div class="type-wrap">
         <input id="quizInput" class="answer-input" placeholder="${placeholder}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ${quiz.checked?"disabled":""}>
-        <div class="type-hint">${quiz.checked?"<kbd style='font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Leertaste</kbd> weiter":"<kbd style='font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Enter</kbd> prüfen"}</div>
+        <div class="type-hint">${quiz.checked?"<kbd style='font-family:inherit;background:rgba(255,255,255,.09);color:var(--ink);box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Leertaste</kbd> weiter":"<kbd style='font-family:inherit;background:rgba(255,255,255,.09);color:var(--ink);box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Enter</kbd> prüfen"}</div>
       </div></div></div></div>
     <div class="actions">${quiz.checked?`<button class="btn reveal" id="qNext">Weiter</button>`:`<button class="btn reveal" id="qCheck">Prüfen</button>`}</div>
     <div class="footline"><span class="count">Frage ${quiz.i+1} / ${quiz.items.length}</span><span class="kb">richtig: ${quiz.correct}</span><button class="reset" id="qAbort">abbrechen</button></div>`;
@@ -2606,7 +2607,7 @@ function renderGram(){
       <div class="cloze-hint">Bedeutung: <b>${it.gv.de}</b> · ${it.form.tip}</div>
       <div class="type-wrap">
         <input id="gramInput" class="answer-input" placeholder="Form eintippen…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ${gram.checked?"disabled":""}>
-        <div class="type-hint">${gram.checked?"<kbd style='font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Leertaste</kbd> weiter":"<kbd style='font-family:inherit;background:#fff;box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Enter</kbd> prüfen"}</div>
+        <div class="type-hint">${gram.checked?"<kbd style='font-family:inherit;background:rgba(255,255,255,.09);color:var(--ink);box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Leertaste</kbd> weiter":"<kbd style='font-family:inherit;background:rgba(255,255,255,.09);color:var(--ink);box-shadow:inset 0 0 0 1px var(--paper-edge);border-radius:6px;padding:3px 8px;font-weight:600'>Enter</kbd> prüfen"}</div>
       </div>
       ${gram.checked?`<div class="note gram" style="margin-top:14px"><strong>${f.reg?"Regelmäßig (‑ed)":"Unregelmäßig"}</strong> · alle Formen von <b>to ${f.base}</b>:${verbTable(f, it.form.key)}</div>`:""}
     </div></div></div>
